@@ -64,6 +64,7 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'avatar' => ['sometimes', 'image', 'mimes:jpg,jpeg,svg,png','max:5000'],
         ]);
     }
 
@@ -75,6 +76,20 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+
+        if(request()->has('avatar')){
+            $avatarupload = request()->file('avatar');
+            $avatarname = time().'.'.$avatarupload->getClientOriginalExtension();
+            $avatarpaht = public_path('/images/');
+            $avatarupload->move($avatarpaht, $avatarname);
+            return User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => Hash::make($data['password']),
+                'avatar'=>'/images/'.$avatarname,
+            ]);
+        }
+
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],
